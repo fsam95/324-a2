@@ -9,7 +9,7 @@ class macro to include support for traits and some basic introspection.
 ; QUESTION 1 (metaprogramming).
 (define-syntax class-meta
   (syntax-rules ()
-    [(class <Class> 
+    [(class-meta <Class> 
        (<attr> ...)
        [(<method> <param> ...) <body>] 
        ...)
@@ -32,8 +32,49 @@ class macro to include support for traits and some basic introspection.
 ; QUESTION 2 (traits).
 (define-syntax class-trait
   (syntax-rules ()
+    [(class-trait <Class> 
+       (<attr> ...) (with)
+       [(<method> <param> ...) <body>] 
+       ...)
+     (class <Class> (<attr> ...) [(<method> <param> ...) <body>] ...)] 
     
+    [(class-trait <Class> 
+       (<attr> ...) (with <trait>)
+       [(<method> <param> ...) <body>] 
+       ...)
+     (define (<Class> <attr> ...)
+       (let ([obj 
+         (lambda (msg)
+           (cond [(equal? msg (id->string <attr>)) <attr>]
+                 ...
+                 [(equal? msg (id->string <method>))
+                  (lambda (<param> ...) <body>)]
+                 ...
+                 [else "Unrecognized message!"]))]) 
+         (<trait> obj)))
+     ]
+    
+     #|
+    [(class-trait <Class> 
+       (<attr> ...) (with <trait1> <trait2> ...)
+       [(<method> <param> ...) <body>]
+       ...)
+     (define (<Class> <attr> ...)
+       (let ([obj 
+         (lambda (msg)
+           (cond [(equal? msg (id->string <attr>)) <attr>]
+                 ...
+                 [(equal? msg (id->string <method>))
+                  (lambda (<param> ...) <body>)]
+                 ...
+                 [else "Unrecognized message!"]))])
+         (<trait1> (class-trait (<attr> ...) (with <trait2> ...) [(<method> <param> ...) <body>] ...))))
+     (void)
+     ]
+     |#
     ))
+
+
 
 ; -----------------------------------------------------------------------------
 ; Class macro. This section is just for your reference.
