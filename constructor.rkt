@@ -11,7 +11,7 @@ one for each attribute.
       [(<method> <param> ...) <body>] ...)
      (define (<Class> <attr> ...)
        (lambda (msg)
-         (cond [(equal? msg (id->string <attr>)) (<constructor-lambda> <attr>)]
+         (cond [(equal? msg (id->string <attr>)) (<constructor-lambda> (list <attr> ...))]
                ...
                [(equal? msg (id->string <method>))
                 (lambda (<param> ...) <body>)]
@@ -32,12 +32,16 @@ def f(r):
   return r + 5
 
 gonna need three lambdas
-|#
 
 (define (f r)
   (+ r 5))
 (class-with-constructor MyClass ((lambda(a)(f a)) (lambda(y)(list b 100 (f a))) 
 
+
+|#
+(define (f r)
+  (+ r 5))
+(class-with-constructor MyClass ((lambda(attrs)(f (list-ref attrs 0))) (lambda(attrs)(list (list-ref attrs 1) 100 (f (list-ref attrs 0)))) (lambda(attrs)(substring "you are cool" 0))) (x y z))
 
 
 (define-syntax id->string
@@ -46,8 +50,14 @@ gonna need three lambdas
      (symbol->string (quote <id>))]
     ))
 
-(class-with-constructor Point-plus-one ((lambda(x)(+ x 1)) (lambda(y)(+ y 1))) (x y))
+(class-with-constructor Point-plus-one ((lambda(attrs)(+ (list-ref attrs 0) 1)) (lambda(attrs)(+ (list-ref attrs 1) 1))) (x y))
 
 ;works fine
 (define p1 (Point-plus-one 1 2))
 (p1 "x")
+(p1 "y")
+
+(define m1 (MyClass 1 "a" (void)))
+(m1 "x")
+(m1 "y")
+(m1 "z")
