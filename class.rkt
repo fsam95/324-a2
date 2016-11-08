@@ -29,6 +29,9 @@ class macro to include support for traits and some basic introspection.
     )]))
 
 
+#|
+How is this working without with
+|#
 ; QUESTION 2 (traits).
 (define-syntax class-trait
   (syntax-rules ()
@@ -53,28 +56,43 @@ class macro to include support for traits and some basic introspection.
                  [else "Unrecognized message!"]))]) 
          (<trait> obj)))
      ]
-    
-     #|
+
     [(class-trait <Class> 
        (<attr> ...) (with <trait1> <trait2> ...)
        [(<method> <param> ...) <body>]
        ...)
      (define (<Class> <attr> ...)
-       (let ([obj 
-         (lambda (msg)
-           (cond [(equal? msg (id->string <attr>)) <attr>]
-                 ...
-                 [(equal? msg (id->string <method>))
-                  (lambda (<param> ...) <body>)]
-                 ...
-                 [else "Unrecognized message!"]))])
-         (<trait1> (class-trait (<attr> ...) (with <trait2> ...) [(<method> <param> ...) <body>] ...))))
-     (void)
+         (<trait1> (ct-object (<attr> ...) (with <trait2> ...) 
+                              [(<method> <param> ...) <body>] 
+                              ...)
+                   )
+         )
      ]
-     |#
     ))
 
-
+(define-syntax ct-object
+  (syntax-rules()
+    [(ct-object 
+       (<attr> ...) (with <trait>)
+       [(<method> <param> ...) <body>]
+       ...)
+     (let ([obj
+             (lambda (msg)
+               (cond [(equal? msg (id->string <attr>)) <attr>]
+                     ...
+                     [(equal? msg (id->string <method>))
+                      (lambda (<param> ...) <body>)]
+                     ...
+                     [else "Unrecognized message!"]))])
+       (<trait> obj))]
+    [(ct-object
+       (<attr> ...) (with <trait1> <trait2> ...)
+       [(<method> <param> ...) <body>]
+       ...)
+     (<trait1> (ct-object (<attr> ...) (with <trait2> ...) 
+                          [(<method> <param> ...) <body>] ...
+                          ))]
+    ))
 
 ; -----------------------------------------------------------------------------
 ; Class macro. This section is just for your reference.
@@ -92,6 +110,8 @@ class macro to include support for traits and some basic introspection.
                ...
                [else "Unrecognized message!"]))
        )]))
+
+
 
 (define-syntax id->string
   (syntax-rules ()

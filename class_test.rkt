@@ -46,18 +46,6 @@
       '("black" "white"))
 
 ; Tests for Question 2
-; Traits for testing
-(define (distance-trait obj)
-  (lambda (msg)
-    (cond [(equal? msg "distance-to-self")
-           (lambda () ((obj "distance") obj))]
-          [(equal? msg "closer")
-           (lambda (obj1 obj2)
-             (if (<= ((obj "distance") obj1)
-                     ((obj "distance") obj2))
-                 obj1
-                 obj2))]
-          [else (obj msg)])))
 
 
 ;class with no traits
@@ -70,6 +58,18 @@
 (define p1 (Point-notraits 1 2))
 (test (p1 "x") 1)
                 
+(define (distance-trait obj)
+  (lambda (msg)
+    (cond [(equal? msg "distance-to-self")
+           (lambda () ((obj "distance") obj))]
+          [(equal? msg "closer")
+           (lambda (obj1 obj2)
+             (if (<= ((obj "distance") obj1)
+                     ((obj "distance") obj2))
+                 obj1
+                 obj2))]
+          [else (obj msg)])))
+
 (class-trait Point (x y) (with distance-trait)
   [(distance other-point)
    (let ([dx (- x (other-point "x"))]
@@ -96,7 +96,6 @@
         (list (p4 "x") (p4 "y")))
       '(31 39))
 
-#|
 (define (distance-trait-2 obj)
   (lambda (msg)
     (cond [(equal? msg "distance-plus")
@@ -108,11 +107,30 @@
    (let ([dx (- x (other-point "x"))]
          [dy (- y (other-point "y"))])
      (sqrt (+ (* dx dx) (* dy dy))))])
+
+(test (let* ([p1 (Point2 1 1)]
+             [p2 (Point 1 1 )])
+        ((p1 "distance") p2))
+      0 
+      )
 (test (let* ([p1 (Point2 30 40)]
              [p2 (Point 15 40)])
         ((p1 "distance-plus") p2 20))
       35)
 
+(define (stupid-trait obj)
+  (lambda (msg)
+    (cond [(equal? msg "stupid") "blah"]
+          [else (obj msg)])
+    )
+  )
 
+(class-trait Point3 (x y) (with distance-trait distance-trait-2 stupid-trait))
 
-|#
+(test (let ([p3 (Point3 1 1)])
+            (p3 "stupid"))
+      "blah")
+             
+           
+           
+           
