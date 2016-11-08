@@ -45,7 +45,10 @@ extending the functionality of the backtracking library.
 > (next)
 "false."
 |#
-(define subsets (void))
+(define (subsets lst)
+  (if (empty? lst)
+      '()
+      (append (-< '() (list (first lst))) (subsets (rest lst)))))
 
 
 ; QUESTION 4
@@ -80,4 +83,6 @@ extending the functionality of the backtracking library.
 |#
 (define-syntax fold-<
   (syntax-rules ()
+    [(fold-< <combine> <init> <expr>)
+     (foldl <combine> <init> (all <expr>))]
     ))
