@@ -64,7 +64,59 @@ extending the functionality of the backtracking library.
   is just to correctly express the constraints, and let the computer
   do the work.
 |#
-(define sudoku-4 (void))
+(define (sudoku-4 puzzle)
+  (?- solved? (fill-in-choices puzzle)))
+
+(define (solved? puzzle)
+  (let* ([cols (get-cols puzzle '())]
+        [quarters (get-quarters puzzle '())])
+    (and (solved-subgrids? puzzle) (solved-subgrids? cols) (solved-subgrids? quarters))))
+
+(define (solved-subgrids? subgrids)
+  (if (empty? subgrids)
+      #t
+      (if (not (solved-subgrid? (first subgrids)))
+          #f
+          (solved-subgrids? (rest subgrids)))))
+
+(define (solved-subgrid? subgrid)
+  (if (check-duplicates subgrid) #f #t))
+
+(define (get-cols puzzle acc)
+  (let* ([trimmed-puzzle (filter-empty-lists puzzle)])
+    (if (empty? trimmed-puzzle)
+        acc
+        (get-cols (map (lambda (x) (list-tail x 1)) trimmed-puzzle)
+                  (append acc (list (map first trimmed-puzzle)))))))
+
+(define (get-quarters puzzle acc)
+  (let* ([trimmed-puzzle (filter-empty-lists puzzle)])
+     (if (empty? trimmed-puzzle)
+      acc
+      (let* ([rows (take trimmed-puzzle 2)]
+             [unmodified-rows (list-tail trimmed-puzzle 2)]
+             [square (apply append 
+                            (map (lambda (x) (take x 2)) rows))]
+             [truncated-rows (map (lambda (x) (list-tail x 2)) rows)]
+             [truncated-puzzle (append truncated-rows unmodified-rows)])
+        (get-quarters truncated-puzzle (append acc (list square)))))))
+
+(define (fill-in-choices puzzle)
+  (map replace-empty-cells-in-row-with-choices puzzle))
+
+(define (replace-empty-cells-in-row-with-choices row)
+  (map substitute-empty-cell-with-choices row))
+
+(define (substitute-empty-cell-with-choices cell)
+  (if (equal? cell "")
+      (-< 1 2 3 4)
+      cell))
+
+(define (filter-empty-lists lst)
+  (filter non-empty-list? lst))
+
+(define (non-empty-list? lst)
+  (not (empty? lst)))
 
 
 ; QUESTION 5
