@@ -137,5 +137,5 @@ We strongly recommend not changing this file.
 (define (get-choice!)
   (let ([choice (first choices)])
     (set! choices (rest choices))
-    (set! choices-store (rest choices))
+    (set! choices-store (rest choices-store))
     choice))
